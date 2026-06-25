@@ -3,7 +3,7 @@ const express = require('express');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-const { allowLocalDevOrigins, frontendUrls, nodeEnv } = require('./config/env');
+const { allowLocalDevOrigins, allowVercelOrigins, frontendUrls, nodeEnv } = require('./config/env');
 const leadRoutes = require('./routes/leadRoutes');
 const trackingRoutes = require('./routes/trackingRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
@@ -14,12 +14,19 @@ const app = express();
 app.set('trust proxy', 1);
 
 const localDevOriginPattern = /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/;
+const vercelOriginPattern = /^https:\/\/[a-z0-9-]+\.vercel\.app$/i;
+
+const isAllowedOrigin = (origin) =>
+  !origin ||
+  frontendUrls.includes(origin) ||
+  (allowLocalDevOrigins && localDevOriginPattern.test(origin)) ||
+  (allowVercelOrigins && vercelOriginPattern.test(origin));
 
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || frontendUrls.includes(origin) || (allowLocalDevOrigins && localDevOriginPattern.test(origin))) {
+      if (isAllowedOrigin(origin)) {
         return callback(null, true);
       }
 
