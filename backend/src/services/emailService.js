@@ -2,14 +2,35 @@ const nodemailer = require('nodemailer');
 const { baseUrl, frontendUrl, smtp } = require('../config/env');
 const { createTrackingToken } = require('../utils/trackingToken');
 
+// const createTransporter = () =>
+//   nodemailer.createTransport({
+//     host: smtp.host,
+//     port: smtp.port,
+//     secure: smtp.secure,
+//     connectionTimeout: 10000,
+//     greetingTimeout: 10000,
+//     socketTimeout: 15000,
+//     auth:
+//       smtp.user && smtp.pass
+//         ? {
+//             user: smtp.user,
+//             pass: smtp.pass,
+//           }
+//         : undefined,
+//   });
+
 const createTransporter = () =>
   nodemailer.createTransport({
     host: smtp.host,
     port: smtp.port,
     secure: smtp.secure,
+
+    family: 4, // Force IPv4
+
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 15000,
+
     auth:
       smtp.user && smtp.pass
         ? {
@@ -17,6 +38,10 @@ const createTransporter = () =>
             pass: smtp.pass,
           }
         : undefined,
+
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
 
 const verifyEmailConnection = async () => {
