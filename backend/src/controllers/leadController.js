@@ -3,6 +3,25 @@ const asyncHandler = require('../utils/asyncHandler');
 const { analyzeRequirement } = require('../services/geminiService');
 const { sendLeadConfirmationEmail } = require('../services/emailService');
 
+const sendLeadEmailInBackground = (leadId) => {
+  setImmediate(async () => {
+    try {
+      const lead = await Lead.findById(leadId);
+      if (!lead) return;
+
+      const emailInfo = await sendLeadConfirmationEmail(lead);
+      if (!emailInfo.skipped) {
+        lead.emailTracking.sent = true;
+        lead.emailTracking.sentAt = new Date();
+        lead.emailTracking.messageId = emailInfo.messageId;
+        await lead.save();
+      }
+    } catch (error) {
+      console.error(`Failed to send email for lead ${leadId}:`, error.message);
+    }
+  });
+};
+
 const createLead = asyncHandler(async (req, res) => {
   const { fullName, email, phone, company, requirement } = req.body;
 
@@ -17,23 +36,13 @@ const createLead = asyncHandler(async (req, res) => {
     aiAnalysis,
   });
 
-  try {
-    const emailInfo = await sendLeadConfirmationEmail(lead);
-    if (!emailInfo.skipped) {
-      lead.emailTracking.sent = true;
-      lead.emailTracking.sentAt = new Date();
-      lead.emailTracking.messageId = emailInfo.messageId;
-      await lead.save();
-    }
-  } catch (error) {
-    console.error(`Failed to send email for lead ${lead._id}:`, error.message);
-  }
-
   res.status(201).json({
     success: true,
     message: 'Lead captured successfully.',
     data: lead,
   });
+
+  sendLeadEmailInBackground(lead._id);
 });
 
 const getLeads = asyncHandler(async (req, res) => {

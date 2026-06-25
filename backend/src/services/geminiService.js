@@ -23,6 +23,14 @@ const parseJsonFromText = (text) => {
   return JSON.parse(match[0]);
 };
 
+const withTimeout = (promise, ms, label) =>
+  Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+    }),
+  ]);
+
 const analyzeRequirement = async ({ fullName, company, requirement }) => {
   if (!gemini.apiKey || gemini.apiKey.startsWith('your_')) {
     return fallbackAnalysis;
@@ -46,7 +54,7 @@ Company: ${company || 'Not provided'}
 Requirement: ${requirement}
 `;
 
-    const result = await model.generateContent(prompt);
+    const result = await withTimeout(model.generateContent(prompt), 8000, 'Gemini analysis');
     const text = result.response.text();
     const parsed = parseJsonFromText(text);
 
