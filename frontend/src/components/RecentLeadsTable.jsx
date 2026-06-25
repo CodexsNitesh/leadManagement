@@ -4,6 +4,13 @@ const priorityClass = {
   Low: 'bg-teal-50 text-teal-700 border-teal-200',
 };
 
+const emailStatusClass = {
+  sent: 'bg-teal-50 text-teal-700 border-teal-200',
+  pending: 'bg-slate-50 text-slate-600 border-slate-200',
+  skipped: 'bg-amber-50 text-amber-700 border-amber-200',
+  failed: 'bg-red-50 text-red-700 border-red-200',
+};
+
 function RecentLeadsTable({ leads }) {
   return (
     <div className="overflow-hidden rounded-lg border border-line bg-white shadow-sm">
@@ -42,7 +49,16 @@ function RecentLeadsTable({ leads }) {
                       {lead.aiAnalysis?.priority || 'Medium'}
                     </span>
                   </td>
-                  <td className="px-4 py-3">{lead.emailTracking?.sent ? 'Yes' : 'No'}</td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex rounded-full border px-2 py-1 text-xs font-semibold ${
+                        emailStatusClass[lead.emailTracking?.status] || emailStatusClass[lead.emailTracking?.sent ? 'sent' : 'pending']
+                      }`}
+                      title={lead.emailTracking?.error || ''}
+                    >
+                      {lead.emailTracking?.status || (lead.emailTracking?.sent ? 'sent' : 'pending')}
+                    </span>
+                  </td>
                   <td className="px-4 py-3">{lead.hasOpened ? 'Yes' : 'No'}</td>
                   <td className="px-4 py-3">{lead.clickCount || 0}</td>
                 </tr>

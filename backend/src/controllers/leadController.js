@@ -10,14 +10,22 @@ const sendLeadEmailInBackground = (leadId) => {
       if (!lead) return;
 
       const emailInfo = await sendLeadConfirmationEmail(lead);
-      if (!emailInfo.skipped) {
+      if (emailInfo.skipped) {
+        lead.emailTracking.status = 'skipped';
+        lead.emailTracking.error = 'SMTP is not configured on the backend.';
+      } else {
+        lead.emailTracking.status = 'sent';
         lead.emailTracking.sent = true;
         lead.emailTracking.sentAt = new Date();
         lead.emailTracking.messageId = emailInfo.messageId;
-        await lead.save();
       }
+      await lead.save();
     } catch (error) {
       console.error(`Failed to send email for lead ${leadId}:`, error.message);
+      await Lead.findByIdAndUpdate(leadId, {
+        'emailTracking.status': 'failed',
+        'emailTracking.error': error.message,
+      });
     }
   });
 };

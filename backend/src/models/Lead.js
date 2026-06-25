@@ -84,6 +84,12 @@ const leadSchema = new mongoose.Schema(
       },
       sentAt: Date,
       messageId: String,
+      status: {
+        type: String,
+        enum: ['pending', 'sent', 'skipped', 'failed'],
+        default: 'pending',
+      },
+      error: String,
       open: emailEventSchema,
       clicks: [clickEventSchema],
     },

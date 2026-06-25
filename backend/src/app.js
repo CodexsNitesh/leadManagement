@@ -3,7 +3,7 @@ const express = require('express');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-const { allowLocalDevOrigins, allowVercelOrigins, frontendUrls, nodeEnv } = require('./config/env');
+const { allowLocalDevOrigins, allowVercelOrigins, baseUrl, frontendUrl, frontendUrls, gemini, mongoUri, nodeEnv, smtp } = require('./config/env');
 const leadRoutes = require('./routes/leadRoutes');
 const trackingRoutes = require('./routes/trackingRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
@@ -54,6 +54,26 @@ app.use(
 
 app.get('/health', (req, res) => {
   res.json({ success: true, message: 'API is healthy.' });
+});
+
+app.get('/health/config', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      nodeEnv,
+      baseUrl,
+      frontendUrl,
+      frontendUrls,
+      mongoConfigured: Boolean(mongoUri),
+      geminiConfigured: Boolean(gemini.apiKey),
+      smtpConfigured: Boolean(smtp.host && smtp.user && smtp.pass),
+      smtpHost: smtp.host || null,
+      smtpUserConfigured: Boolean(smtp.user),
+      smtpPassConfigured: Boolean(smtp.pass),
+      allowLocalDevOrigins,
+      allowVercelOrigins,
+    },
+  });
 });
 
 app.get('/', (req, res) => {
