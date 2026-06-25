@@ -4,7 +4,7 @@ import Dashboard from './pages/Dashboard.jsx';
 
 function App() {
   const path = window.location.pathname;
-  const isDashboard = path.startsWith('/dashboard');
+  const isDashboard = path.startsWith('/client-dashboard') || path.startsWith('/dashboard');
 
   return (
     <main className="min-h-screen">
@@ -13,26 +13,24 @@ function App() {
           <a href="/" className="text-base font-bold text-ink">
             Lead Management
           </a>
-          <div className="flex items-center gap-2">
-            <a
-              href="/"
-              className={`focus-ring inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold ${
-                !isDashboard ? 'bg-teal-700 text-white' : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <FileText size={16} />
-              User Form
-            </a>
-            <a
-              href="/dashboard"
-              className={`focus-ring inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold ${
-                isDashboard ? 'bg-teal-700 text-white' : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <BarChart3 size={16} />
-              Client Dashboard
-            </a>
-          </div>
+          {isDashboard && (
+            <div className="flex items-center gap-2">
+              <a
+                href="/"
+                className="focus-ring inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+              >
+                <FileText size={16} />
+                User Form
+              </a>
+              <a
+                href="/client-dashboard"
+                className="focus-ring inline-flex items-center gap-2 rounded-md bg-teal-700 px-3 py-2 text-sm font-semibold text-white"
+              >
+                <BarChart3 size={16} />
+                Client Dashboard
+              </a>
+            </div>
+          )}
         </div>
       </nav>
 

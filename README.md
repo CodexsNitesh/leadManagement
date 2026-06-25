@@ -107,7 +107,7 @@ Open `http://localhost:5173` for the public user form.
 Client dashboard:
 
 ```text
-http://localhost:5173/dashboard
+http://localhost:5173/client-dashboard
 ```
 
 ## Environment Variables
