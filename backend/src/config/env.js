@@ -30,7 +30,7 @@ module.exports = {
   mongoUri: process.env.MONGODB_URI,
   gemini: {
     apiKey: process.env.GEMINI_API_KEY,
-    model: process.env.GEMINI_MODEL || 'gemini-1.5-flash',
+    model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
   },
   smtp: {
     host: process.env.SMTP_HOST,
