@@ -1,8 +1,11 @@
 require('dotenv').config();
+const dns = require('dns');
 const app = require('./app');
 const connectDB = require('./config/db');
 const { port } = require('./config/env');
 const { verifyEmailConnection } = require('./services/emailService');
+
+dns.setDefaultResultOrder('ipv4first');
 
 const startServer = () => {
   const server = app.listen(port, () => {

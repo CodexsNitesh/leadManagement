@@ -1,36 +1,19 @@
+const dns = require('dns');
 const nodemailer = require('nodemailer');
 const { baseUrl, frontendUrl, smtp } = require('../config/env');
 const { createTrackingToken } = require('../utils/trackingToken');
 
-// const createTransporter = () =>
-//   nodemailer.createTransport({
-//     host: smtp.host,
-//     port: smtp.port,
-//     secure: smtp.secure,
-//     connectionTimeout: 10000,
-//     greetingTimeout: 10000,
-//     socketTimeout: 15000,
-//     auth:
-//       smtp.user && smtp.pass
-//         ? {
-//             user: smtp.user,
-//             pass: smtp.pass,
-//           }
-//         : undefined,
-//   });
+dns.setDefaultResultOrder('ipv4first');
 
 const createTransporter = () =>
   nodemailer.createTransport({
     host: smtp.host,
     port: smtp.port,
     secure: smtp.secure,
-
-    family: 4, // Force IPv4
-
+    family: 4,
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 15000,
-
     auth:
       smtp.user && smtp.pass
         ? {
@@ -38,10 +21,7 @@ const createTransporter = () =>
             pass: smtp.pass,
           }
         : undefined,
-
-    tls: {
-      rejectUnauthorized: false,
-    },
+    tls: smtp.host ? { servername: smtp.host } : undefined,
   });
 
 const verifyEmailConnection = async () => {
@@ -64,7 +44,7 @@ const buildLeadEmail = (lead) => {
   const openToken = createTrackingToken(lead._id, 'open');
   const clickToken = createTrackingToken(lead._id, 'click');
   const trackingPixelUrl = `${baseUrl}/api/tracking/open/${lead._id}.png?t=${openToken}`;
-  const destination = `${frontendUrl}/dashboard?lead=${lead._id}`;
+  const destination = `${frontendUrl}/client-dashboard?lead=${lead._id}`;
   const trackableLink = `${baseUrl}/api/tracking/click/${lead._id}?t=${clickToken}&url=${encodeURIComponent(destination)}`;
 
   const text = [
