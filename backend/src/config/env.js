@@ -25,6 +25,7 @@ module.exports = {
     .split(',')
     .map((url) => url.trim())
     .filter(Boolean),
+  allowLocalDevOrigins: process.env.ALLOW_LOCAL_DEV_ORIGINS !== 'false',
   mongoUri: process.env.MONGODB_URI,
   gemini: {
     apiKey: process.env.GEMINI_API_KEY,

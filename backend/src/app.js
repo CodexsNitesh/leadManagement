@@ -3,7 +3,7 @@ const express = require('express');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-const { frontendUrls, nodeEnv } = require('./config/env');
+const { allowLocalDevOrigins, frontendUrls, nodeEnv } = require('./config/env');
 const leadRoutes = require('./routes/leadRoutes');
 const trackingRoutes = require('./routes/trackingRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
@@ -19,7 +19,7 @@ app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || frontendUrls.includes(origin) || (nodeEnv === 'development' && localDevOriginPattern.test(origin))) {
+      if (!origin || frontendUrls.includes(origin) || (allowLocalDevOrigins && localDevOriginPattern.test(origin))) {
         return callback(null, true);
       }
 
