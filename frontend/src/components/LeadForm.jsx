@@ -37,9 +37,9 @@ function LeadForm({ onLeadCreated }) {
 
     try {
       const lead = await createLead(form);
-      setSuccess(`Lead captured. AI priority: ${lead.aiAnalysis.priority}.`);
+      setSuccess('Thanks. Your request has been submitted successfully.');
       setForm(initialForm);
-      await onLeadCreated();
+      await onLeadCreated?.(lead);
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
