@@ -5,9 +5,23 @@ const { createTrackingToken } = require('../utils/trackingToken');
 
 dns.setDefaultResultOrder('ipv4first');
 
-const createTransporter = () =>
-  nodemailer.createTransport({
-    host: smtp.host,
+const resolveSmtpHost = async () => {
+  if (!smtp.host) return smtp.host;
+
+  try {
+    const addresses = await dns.promises.resolve4(smtp.host);
+    return addresses[0] || smtp.host;
+  } catch (error) {
+    console.warn(`Could not resolve IPv4 address for SMTP host ${smtp.host}: ${error.message}`);
+    return smtp.host;
+  }
+};
+
+const createTransporter = async () => {
+  const host = await resolveSmtpHost();
+
+  return nodemailer.createTransport({
+    host,
     port: smtp.port,
     secure: smtp.secure,
     family: 4,
@@ -23,6 +37,7 @@ const createTransporter = () =>
         : undefined,
     tls: smtp.host ? { servername: smtp.host } : undefined,
   });
+};
 
 const verifyEmailConnection = async () => {
   if (!smtp.host || !smtp.user || !smtp.pass) {
@@ -31,7 +46,8 @@ const verifyEmailConnection = async () => {
   }
 
   try {
-    await createTransporter().verify();
+    const transporter = await createTransporter();
+    await transporter.verify();
     console.log('Email transporter verified.');
     return true;
   } catch (error) {
@@ -89,7 +105,7 @@ const sendLeadConfirmationEmail = async (lead) => {
   }
 
   const { html, text } = buildLeadEmail(lead);
-  const transporter = createTransporter();
+  const transporter = await createTransporter();
 
   const info = await transporter.sendMail({
     from: `"${smtp.fromName}" <${smtp.fromAddress}>`,
